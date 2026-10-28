@@ -1,27 +1,86 @@
 @host = https://localhost:7022
 
-### 1. Login corect (trebuie 200 + token)
-# @name login
+### Login admin
+# @name admin
 POST {{host}}/api/auth/login
 Content-Type: application/json
 
-{
-  "username": "admin",
-  "password": "Parola123!"
-}
+{ "username": "admin", "password": "Parola123!" }
 
-### 2. Cine sunt eu (foloseste automat tokenul de la cererea 1)
-GET {{host}}/api/auth/me
-Authorization: Bearer {{login.response.body.$.accessToken}}
-
-### 3. Parola gresita (trebuie 401)
+### Login employee
+# @name employee
 POST {{host}}/api/auth/login
 Content-Type: application/json
 
+{ "username": "employee", "password": "Parola123!" }
+
+### 1. Toate produsele
+GET {{host}}/api/products
+Authorization: Bearer {{admin.response.body.$.accessToken}}
+
+### 2. Cautare + filtre
+GET {{host}}/api/products?search=blugi&lowStockOnly=true
+Authorization: Bearer {{admin.response.body.$.accessToken}}
+
+### 3. Categorii
+GET {{host}}/api/products/categories
+Authorization: Bearer {{admin.response.body.$.accessToken}}
+
+### 4. Admin adauga produs (201)
+# @name create
+POST {{host}}/api/products
+Authorization: Bearer {{admin.response.body.$.accessToken}}
+Content-Type: application/json
+
 {
-  "username": "admin",
-  "password": "gresit"
+  "sku": "TSH-OVR-GRN-XL",
+  "name": "Tricou oversized",
+  "category": "Tricouri",
+  "size": "XL",
+  "color": "Verde",
+  "price": 69.90,
+  "lowStockThreshold": 10,
+  "initialQuantity": 25
 }
 
-### 4. Fara token (trebuie 401)
-GET {{host}}/api/auth/me
+### 5. Employee incearca sa adauge produs (403)
+POST {{host}}/api/products
+Authorization: Bearer {{employee.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "sku": "TEST-123",
+  "name": "Test",
+  "category": "Test",
+  "size": "M",
+  "color": "Alb",
+  "price": 10,
+  "lowStockThreshold": 1,
+  "initialQuantity": 0
+}
+
+### 6. Employee scoate 3 bucati din produsul nou (200)
+POST {{host}}/api/products/{{create.response.body.$.id}}/stock
+Authorization: Bearer {{employee.response.body.$.accessToken}}
+Content-Type: application/json
+
+{ "delta": -3, "reason": "Comanda #1042" }
+
+### 7. Scoate prea mult (409)
+POST {{host}}/api/products/{{create.response.body.$.id}}/stock
+Authorization: Bearer {{employee.response.body.$.accessToken}}
+Content-Type: application/json
+
+{ "delta": -1000, "reason": "Test" }
+
+### 8. Istoric stoc
+GET {{host}}/api/products/{{create.response.body.$.id}}/movements
+Authorization: Bearer {{admin.response.body.$.accessToken}}
+
+### 9. Employee incearca sa stearga (403)
+DELETE {{host}}/api/products/{{create.response.body.$.id}}
+Authorization: Bearer {{employee.response.body.$.accessToken}}
+
+### 10. Admin sterge (204)
+DELETE {{host}}/api/products/{{create.response.body.$.id}}
+Authorization: Bearer {{admin.response.body.$.accessToken}}

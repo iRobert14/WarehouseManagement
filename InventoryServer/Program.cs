@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using InventoryServer.Features.Products;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,6 +93,7 @@ app.MapGet("/api/health/db", async (InventoryDbContext db) =>
     .AllowAnonymous();
 
 app.MapAuthEndpoints();
+app.MapProductEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {
