@@ -1,12 +1,48 @@
 ﻿<Window x:Class="InventoryClient.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:InventoryClient"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Warehouse Management"
+        Height="720" Width="1200"
+        MinHeight="600" MinWidth="900"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI">
 
-    </Grid>
+    <Border Background="{StaticResource WindowBrush}"
+            BorderBrush="{StaticResource OutlineBrush}"
+            BorderThickness="1"
+            CornerRadius="16">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="48"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <TextBlock Text="Warehouse Management"
+                           Margin="20,0"
+                           VerticalAlignment="Center"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource MutedTextBrush}"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,8,0">
+                    <TextBlock Text="{Binding UserDisplay}"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource MutedTextBrush}"
+                               Margin="0,0,12,0"/>
+                    <Button Content="Logout"
+                            Style="{StaticResource TitleBarButton}"
+                            Command="{Binding LogoutCommand}"
+                            Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVisibility}}"/>
+                    <Button Content="—" Style="{StaticResource TitleBarButton}" Command="{Binding MinimizeCommand}"/>
+                    <Button Content="✕" Style="{StaticResource TitleBarButton}" Command="{Binding CloseCommand}"/>
+                </StackPanel>
+            </Grid>
+
+            <ContentControl Grid.Row="1" Content="{Binding Navigation.CurrentViewModel}"/>
+        </Grid>
+    </Border>
 </Window>
