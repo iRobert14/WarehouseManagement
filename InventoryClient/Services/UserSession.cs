@@ -11,6 +11,7 @@ public class UserSession
     public bool IsLoggedIn => AccessToken is not null;
     public bool CanManageProducts => CurrentUser?.Role is UserRole.Admin or UserRole.Manager;
     public bool CanDeleteProducts => CurrentUser?.Role is UserRole.Admin;
+    public bool CanManageUsers => CurrentUser?.Role is UserRole.Admin;
 
     public event EventHandler? LoggedIn;
     public event EventHandler? LoggedOut;

@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using InventoryServer.Features.Products;
+using InventoryServer.Features.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,7 +63,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
     .AddPolicy(Policies.ManageProducts, policy => policy.RequireRole("Admin", "Manager"))
-    .AddPolicy(Policies.DeleteProducts, policy => policy.RequireRole("Admin"));
+        .AddPolicy(Policies.DeleteProducts, policy => policy.RequireRole("Admin"))
+    .AddPolicy(Policies.ManageUsers, policy => policy.RequireRole("Admin"));
 
 
 builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
@@ -94,6 +96,7 @@ app.MapGet("/api/health/db", async (InventoryDbContext db) =>
 
 app.MapAuthEndpoints();
 app.MapProductEndpoints();
+app.MapUserEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {

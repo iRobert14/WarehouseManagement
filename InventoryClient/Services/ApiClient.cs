@@ -51,7 +51,20 @@ public class ApiClient(HttpClient http)
 
     public Task<List<StockMovementDto>> GetMovementsAsync(Guid id) =>
         SendAsync<List<StockMovementDto>>(() => http.GetAsync($"api/products/{id}/movements"));
+    public Task<List<UserListItemDto>> GetUsersAsync() =>
+    SendAsync<List<UserListItemDto>>(() => http.GetAsync("api/users"));
 
+    public Task<UserListItemDto> CreateUserAsync(CreateUserRequest request) =>
+        SendAsync<UserListItemDto>(() => http.PostAsJsonAsync("api/users", request, JsonOptions));
+
+    public Task<UserListItemDto> UpdateUserAsync(int id, UpdateUserRequest request) =>
+        SendAsync<UserListItemDto>(() => http.PutAsJsonAsync($"api/users/{id}", request, JsonOptions));
+
+    public async Task ResetPasswordAsync(int id, string newPassword)
+    {
+        using var response = await SendAsync(() =>
+            http.PostAsJsonAsync($"api/users/{id}/reset-password", new ResetPasswordRequest(newPassword), JsonOptions));
+    }
     private static async Task<T> SendAsync<T>(Func<Task<HttpResponseMessage>> send)
     {
         using var response = await SendAsync(send);

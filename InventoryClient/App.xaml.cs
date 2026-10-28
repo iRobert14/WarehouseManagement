@@ -38,6 +38,7 @@ public partial class App : Application
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<InventoryViewModel>();
+        builder.Services.AddTransient<UsersViewModel>();
         builder.Services.AddSingleton<MainWindow>();
 
         _host = builder.Build();

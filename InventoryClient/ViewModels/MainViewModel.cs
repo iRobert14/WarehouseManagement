@@ -28,9 +28,17 @@ public partial class MainViewModel : ObservableObject
 
     public bool IsLoggedIn => _session.IsLoggedIn;
 
+    public bool IsAdmin => _session.CanManageUsers;
+
     public string UserDisplay => _session.CurrentUser is { } user
         ? $"{user.Username} · {user.Role}"
         : string.Empty;
+
+    [RelayCommand]
+    private void ShowInventory() => Navigation.NavigateTo<InventoryViewModel>();
+
+    [RelayCommand]
+    private void ShowUsers() => Navigation.NavigateTo<UsersViewModel>();
 
     [RelayCommand]
     private void Logout() => _session.End();
@@ -44,6 +52,7 @@ public partial class MainViewModel : ObservableObject
     private void RefreshUserInfo()
     {
         OnPropertyChanged(nameof(IsLoggedIn));
+        OnPropertyChanged(nameof(IsAdmin));
         OnPropertyChanged(nameof(UserDisplay));
     }
 }
