@@ -25,6 +25,7 @@ public partial class App : Application
 
         builder.Services.AddSingleton<UserSession>();
         builder.Services.AddSingleton<NavigationService>();
+        builder.Services.AddSingleton<DialogService>();
         builder.Services.AddTransient<AuthHeaderHandler>();
 
         builder.Services.AddHttpClient<ApiClient>(client =>

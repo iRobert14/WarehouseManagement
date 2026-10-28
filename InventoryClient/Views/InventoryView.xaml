@@ -1,6 +1,15 @@
 ﻿<UserControl x:Class="InventoryClient.Views.InventoryView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource MutedTextBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="2,12,0,6"/>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="24,8,24,24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -10,6 +19,12 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Margin="0,0,0,16">
+            <Button DockPanel.Dock="Right"
+                    Content="+  Produs nou"
+                    Style="{StaticResource PrimaryButton}"
+                    Margin="10,0,0,0"
+                    Command="{Binding NewProductCommand}"
+                    Visibility="{Binding CanManageProducts, Converter={StaticResource BoolToVisibility}}"/>
             <Button DockPanel.Dock="Right"
                     Content="↻  Reîncarcă"
                     Style="{StaticResource SecondaryButton}"
@@ -82,74 +97,272 @@
                           IsChecked="{Binding ShowLowStockOnly}"/>
         </Grid>
 
-        <Border Grid.Row="3" Style="{StaticResource Card}" Padding="8">
-            <Grid>
-                <DataGrid Style="{StaticResource DarkDataGrid}"
-                          ItemsSource="{Binding Products}"
-                          SelectedItem="{Binding SelectedProduct}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="SKU" Binding="{Binding Sku}" Width="150"/>
-                        <DataGridTextColumn Header="Produs" Binding="{Binding Name}" Width="*"/>
-                        <DataGridTextColumn Header="Categorie" Binding="{Binding Category}" Width="120"/>
-                        <DataGridTextColumn Header="Mărime" Binding="{Binding Size}" Width="80"/>
-                        <DataGridTextColumn Header="Culoare" Binding="{Binding Color}" Width="100"/>
-                        <DataGridTextColumn Header="Preț" Binding="{Binding Price, StringFormat='{}{0:N2} lei'}" Width="110"/>
-                        <DataGridTemplateColumn Header="Stoc" Width="140" SortMemberPath="Quantity">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Quantity}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                        <Border x:Name="badge"
-                                                Background="{StaticResource WarningBrush}"
-                                                CornerRadius="6"
-                                                Padding="6,1"
-                                                Margin="8,0,0,0"
-                                                Visibility="Collapsed">
-                                            <TextBlock x:Name="badgeText"
-                                                       Text="redus"
-                                                       Foreground="#272537"
-                                                       FontSize="11"
-                                                       FontWeight="SemiBold"/>
-                                        </Border>
-                                    </StackPanel>
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding IsLowStock}" Value="True">
-                                            <Setter TargetName="badge" Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Quantity}" Value="0">
-                                            <Setter TargetName="badge" Property="Background" Value="{StaticResource DangerBrush}"/>
-                                            <Setter TargetName="badgeText" Property="Text" Value="epuizat"/>
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Niciun produs nu corespunde filtrelor."
-                           Foreground="{StaticResource MutedTextBrush}"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Products.Count}" Value="0">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+            <Border Style="{StaticResource Card}" Padding="8">
+                <Grid>
+                    <DataGrid Style="{StaticResource DarkDataGrid}"
+                              ItemsSource="{Binding Products}"
+                              SelectedItem="{Binding SelectedProduct}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="SKU" Binding="{Binding Sku}" Width="150"/>
+                            <DataGridTextColumn Header="Produs" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="Categorie" Binding="{Binding Category}" Width="110"/>
+                            <DataGridTextColumn Header="Mărime" Binding="{Binding Size}" Width="70"/>
+                            <DataGridTextColumn Header="Culoare" Binding="{Binding Color}" Width="90"/>
+                            <DataGridTextColumn Header="Preț" Binding="{Binding Price, StringFormat='{}{0:N2} lei'}" Width="100"/>
+                            <DataGridTemplateColumn Header="Stoc" Width="130" SortMemberPath="Quantity">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Quantity}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <Border x:Name="badge"
+                                                    Background="{StaticResource WarningBrush}"
+                                                    CornerRadius="6"
+                                                    Padding="6,1"
+                                                    Margin="8,0,0,0"
+                                                    Visibility="Collapsed">
+                                                <TextBlock x:Name="badgeText"
+                                                           Text="redus"
+                                                           Foreground="#272537"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsLowStock}" Value="True">
+                                                <Setter TargetName="badge" Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Quantity}" Value="0">
+                                                <Setter TargetName="badge" Property="Background" Value="{StaticResource DangerBrush}"/>
+                                                <Setter TargetName="badgeText" Property="Text" Value="epuizat"/>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
 
-                <TextBlock Text="{Binding ErrorMessage}"
-                           Foreground="{StaticResource DangerBrush}"
-                           TextWrapping="Wrap"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Bottom"
-                           Margin="0,0,0,12"/>
-            </Grid>
-        </Border>
+                    <TextBlock Text="Niciun produs nu corespunde filtrelor."
+                               Foreground="{StaticResource MutedTextBrush}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Products.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <TextBlock Text="{Binding ErrorMessage}"
+                               Foreground="{StaticResource DangerBrush}"
+                               TextWrapping="Wrap"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Bottom"
+                               Margin="0,0,0,12"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1"
+                    Width="360"
+                    Margin="16,0,0,0"
+                    Padding="20,16"
+                    Style="{StaticResource Card}"
+                    Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolToVisibility}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,0,6,0">
+
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right"
+                                    Content="✕"
+                                    Style="{StaticResource TitleBarButton}"
+                                    Command="{Binding CloseEditorCommand}"/>
+                            <TextBlock Text="{Binding PanelTitle}"
+                                       FontSize="18" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextBrush}"
+                                       VerticalAlignment="Center"/>
+                        </DockPanel>
+
+                        <StackPanel IsEnabled="{Binding CanManageProducts}">
+                            <TextBlock Text="SKU" Style="{StaticResource FieldLabel}"/>
+                            <TextBox Style="{StaticResource InputBox}"
+                                     Tag="ex: TSH-BAS-WHT-M"
+                                     Text="{Binding Form.Sku, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <TextBlock Text="Nume" Style="{StaticResource FieldLabel}"/>
+                            <TextBox Style="{StaticResource InputBox}"
+                                     Text="{Binding Form.Name, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <TextBlock Text="Categorie" Style="{StaticResource FieldLabel}"/>
+                            <TextBox Style="{StaticResource InputBox}"
+                                     Tag="ex: Tricouri"
+                                     Text="{Binding Form.Category, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Mărime" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Style="{StaticResource InputBox}"
+                                             Tag="ex: M"
+                                             Text="{Binding Form.Size, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Culoare" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Style="{StaticResource InputBox}"
+                                             Text="{Binding Form.Color, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Preț (lei)" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Style="{StaticResource InputBox}"
+                                             Tag="49,90"
+                                             Text="{Binding Form.PriceText, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Prag stoc redus" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Style="{StaticResource InputBox}"
+                                             Text="{Binding Form.LowStockThresholdText, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Visibility="{Binding IsNewProduct, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="Cantitate inițială" Style="{StaticResource FieldLabel}"/>
+                                <TextBox Style="{StaticResource InputBox}"
+                                         Text="{Binding Form.InitialQuantityText, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Grid Margin="0,18,0,0"
+                              Visibility="{Binding CanManageProducts, Converter={StaticResource BoolToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Content="Salvează"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding SaveProductCommand}"/>
+                            <Button Grid.Column="1"
+                                    Content="Șterge"
+                                    Margin="10,0,0,0"
+                                    Style="{StaticResource DangerButton}"
+                                    Command="{Binding DeleteProductCommand}"
+                                    Visibility="{Binding ShowDeleteButton, Converter={StaticResource BoolToVisibility}}"/>
+                        </Grid>
+
+                        <TextBlock Text="{Binding FormMessage}" TextWrapping="Wrap" Margin="2,12,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding FormMessageIsError}" Value="True">
+                                            <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <StackPanel Margin="0,20,0,0"
+                                    Visibility="{Binding ShowStockSection, Converter={StaticResource BoolToVisibility}}">
+                            <Border Height="1" Background="{StaticResource OutlineBrush}" Margin="0,0,0,8"/>
+
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right"
+                                           Text="{Binding SelectedProduct.Quantity, StringFormat='{}{0} buc.'}"
+                                           FontSize="18" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}"
+                                           VerticalAlignment="Bottom"/>
+                                <TextBlock Text="Mișcare de stoc" Style="{StaticResource FieldLabel}"/>
+                            </DockPanel>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Style="{StaticResource InputBox}"
+                                         Tag="Buc."
+                                         Text="{Binding StockAmountText, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBox Grid.Column="2"
+                                         Style="{StaticResource InputBox}"
+                                         Tag="Motiv (ex: Comanda #1042)"
+                                         Text="{Binding StockReason, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Content="+  Intrare"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Background="{StaticResource SuccessBrush}"
+                                        Foreground="#272537"
+                                        Command="{Binding StockInCommand}"/>
+                                <Button Grid.Column="2"
+                                        Content="−  Ieșire"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Command="{Binding StockOutCommand}"/>
+                            </Grid>
+
+                            <TextBlock Text="Istoric" Style="{StaticResource FieldLabel}" Margin="2,20,0,8"/>
+
+                            <ItemsControl ItemsSource="{Binding Movements}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="56"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock x:Name="delta"
+                                                       Text="{Binding DeltaText}"
+                                                       FontSize="15" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource DangerBrush}"/>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Reason}"
+                                                           Foreground="{StaticResource TextBrush}"
+                                                           TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Details}"
+                                                           Foreground="{StaticResource MutedTextBrush}"
+                                                           FontSize="11"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsIncoming}" Value="True">
+                                                <Setter TargetName="delta" Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
