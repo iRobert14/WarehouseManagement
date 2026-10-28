@@ -1,6 +1,27 @@
-@InventoryServer_HostAddress = http://localhost:5270
+@host = https://localhost:7022
 
-GET {{InventoryServer_HostAddress}}/weatherforecast/
-Accept: application/json
+### 1. Login corect (trebuie 200 + token)
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: application/json
 
-###
+{
+  "username": "admin",
+  "password": "Parola123!"
+}
+
+### 2. Cine sunt eu (foloseste automat tokenul de la cererea 1)
+GET {{host}}/api/auth/me
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### 3. Parola gresita (trebuie 401)
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "gresit"
+}
+
+### 4. Fara token (trebuie 401)
+GET {{host}}/api/auth/me
